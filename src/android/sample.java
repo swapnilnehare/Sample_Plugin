@@ -98,6 +98,16 @@ public class sample extends CordovaPlugin {
                 {
                      String username = args.getJSONObject(0).getString("username");
                      String password = args.getJSONObject(0).getString("password");
+                     genarateKey(username);
+                     byte[] publicKeyBytes = publicKey.getEncoded();
+                     String publicKeyString = Base64.encodeToString(publicKeyBytes, Base64.NO_WRAP);
+                     Log.i("Public key",publicKeyString);
+                     JSONObject jsonParam = new JSONObject();
+                     jsonParam.put("username",us);
+                     jsonParam.put("password",pw);
+                     jsonParam.put("publickey",publicKeyString);
+                     Log.i("JsonObject",jsonParam.toString());
+                     new SendDeviceDetails().execute(jsonParam.toString());
                     
                           
                 }catch(Exception ex)
@@ -109,4 +119,43 @@ public class sample extends CordovaPlugin {
             callback.error("Please donot pass null value");
         }
     }
+    class SendDeviceDetails extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            String data="";
+            try{
+
+                URL url = new URL("http://192.168.43.176:8080/authenticate");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
+                conn.setRequestProperty("Accept","application/json");
+                conn.setDoOutput(true);
+                conn.setDoInput(true);
+                DataOutputStream os = new DataOutputStream(conn.getOutputStream());
+                os.writeBytes(params[0]);
+                os.flush();
+                os.close();
+                Log.i("STATUS", String.valueOf(conn.getResponseCode()));
+                Log.i("MSG" , conn.getResponseMessage());
+                InputStreamReader inputStreamReader = new InputStreamReader(conn.getInputStream());
+                int inputStreamData = inputStreamReader.read();
+                while (inputStreamData != -1) {
+                    char current = (char) inputStreamData;
+                    inputStreamData = inputStreamReader.read();
+                    data += current;
+                }
+                Log.i("data",data);
+
+
+            }
+            catch (Exception e)
+            {
+                Log.d("error", "user data send failed!", e);
+            }
+            return data;
+        }
+}
 }
