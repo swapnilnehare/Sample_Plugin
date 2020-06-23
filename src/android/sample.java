@@ -51,6 +51,7 @@ import java.security.spec.ECGenParameterSpec;
  */
 public class sample extends CordovaPlugin {
 
+    private PublicKey publicKey;
     private FingerprintManager mFingerPrintManager;
     private KeyguardManager mKeyguardManager;
 
@@ -107,7 +108,8 @@ public class sample extends CordovaPlugin {
                      jsonParam.put("password",pw);
                      jsonParam.put("publickey",publicKeyString);
                      Log.i("JsonObject",jsonParam.toString());
-                     new SendDeviceDetails().execute(jsonParam.toString());
+                     String answer=new SendDeviceDetails().execute(jsonParam.toString()).get();
+                     callback.success(""+answer);
                     
                           
                 }catch(Exception ex)
@@ -117,6 +119,28 @@ public class sample extends CordovaPlugin {
         }else
         {
             callback.error("Please donot pass null value");
+        }
+    }
+    public void genarateKey(final String keyname)
+    {
+        try {
+            keyStore = KeyStore.getInstance("AndroidKeyStore");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            KeyPairGenerator generator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, "AndroidKeyStore");
+            KeyGenParameterSpec.Builder builder = new KeyGenParameterSpec.Builder(keyname, KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY);
+            builder.setDigests(KeyProperties.DIGEST_SHA256);
+            builder.setAlgorithmParameterSpec(new ECGenParameterSpec("secp256r1"));
+            builder.setUserAuthenticationRequired(true);
+            KeyGenParameterSpec spec = builder.build();
+            generator.initialize(spec);
+            KeyPair pair = generator.generateKeyPair();
+            publicKey = pair.getPublic();
+            Log.i("Publickey",publicKey.getEncoded().toString());
+        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
+            Log.d("Error", "Key generation failed!", e);
         }
     }
     class SendDeviceDetails extends AsyncTask<String, Void, String> {
@@ -156,6 +180,11 @@ public class sample extends CordovaPlugin {
                 Log.d("error", "user data send failed!", e);
             }
             return data;
+        }
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            
         }
 }
 }
