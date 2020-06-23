@@ -8,10 +8,10 @@ import org.apache.cordova.CordovaInterface;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.omg.CORBA.INITIALIZE;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
+
+
+
 
 import android.Manifest;
 import android.app.KeyguardManager;
@@ -54,10 +54,10 @@ public class sample extends CordovaPlugin {
     private PublicKey publicKey;
     private FingerprintManager mFingerPrintManager;
     private KeyguardManager mKeyguardManager;
-
+    private KeyStore keyStore;
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
-        Log.v(TAG, "Init FingerprintAuth");
+    
 
         if (android.os.Build.VERSION.SDK_INT < 23) {
             return;
@@ -104,8 +104,8 @@ public class sample extends CordovaPlugin {
                      String publicKeyString = Base64.encodeToString(publicKeyBytes, Base64.NO_WRAP);
                      Log.i("Public key",publicKeyString);
                      JSONObject jsonParam = new JSONObject();
-                     jsonParam.put("username",us);
-                     jsonParam.put("password",pw);
+                     jsonParam.put("username",username);
+                     jsonParam.put("password",password);
                      jsonParam.put("publickey",publicKeyString);
                      Log.i("JsonObject",jsonParam.toString());
                      String answer=new SendDeviceDetails().execute(jsonParam.toString()).get();
@@ -138,7 +138,7 @@ public class sample extends CordovaPlugin {
             generator.initialize(spec);
             KeyPair pair = generator.generateKeyPair();
             publicKey = pair.getPublic();
-            Log.i("Publickey",publicKey.getEncoded().toString());
+            Log.d("Publickey",publicKey.getEncoded().toString());
         } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
             Log.d("Error", "Key generation failed!", e);
         }
@@ -171,7 +171,7 @@ public class sample extends CordovaPlugin {
                     inputStreamData = inputStreamReader.read();
                     data += current;
                 }
-                Log.i("data",data);
+                Log.d("data",data);
 
 
             }
